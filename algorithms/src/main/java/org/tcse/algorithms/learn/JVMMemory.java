@@ -1,6 +1,7 @@
 package org.tcse.algorithms.learn;
 
 public class JVMMemory {
+	@SuppressWarnings("unused")
 	public static void main(String[] args) throws Exception {
 		int m = 1024 * 1024;
 		byte[] b = new byte[2 * m];
