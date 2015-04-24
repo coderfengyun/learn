@@ -12,13 +12,16 @@ public class User {
 	private long id;
 	@Column
 	private String name;
+	@Column
+	private double totalBalance;
 
 	public User() {
 	}
 
-	public User(long id, String name) {
+	public User(long id, String name, double initialBalance) {
 		this.id = id;
 		this.name = name;
+		this.totalBalance = initialBalance;
 	}
 
 	public long getId() {
@@ -29,4 +32,11 @@ public class User {
 		return name;
 	}
 
+	public double getTotalBalance() {
+		return totalBalance;
+	}
+
+	public void deductBalance(double amount) {
+		this.totalBalance -= amount;
+	}
 }
