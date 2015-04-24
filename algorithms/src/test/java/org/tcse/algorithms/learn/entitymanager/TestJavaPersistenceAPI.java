@@ -43,7 +43,7 @@ public class TestJavaPersistenceAPI {
 		Account account = new Account(id, user, initialBalance);
 		this.accountRepo.store(account);
 
-		this.accountRepo.detach((long) id);
+		this.accountRepo.remove((long) id);
 
 		assertNull(this.accountRepo.findBy((long) id));
 		assertNotNull(this.userRepo.findBy((long) id));
