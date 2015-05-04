@@ -57,7 +57,7 @@ public abstract class AbstractJPARepository<TAggregateRoot, IdType extends Seria
 		}
 	}
 
-	public TAggregateRoot findBy(Predicate uniqueSpecification) {
+	public TAggregateRoot findBy(Optional<Predicate> uniqueSpecification) {
 		this.entityManager.getTransaction().begin();
 		try {
 			CriteriaQuery<TAggregateRoot> query = createCriteriaQuery(uniqueSpecification);
@@ -72,12 +72,14 @@ public abstract class AbstractJPARepository<TAggregateRoot, IdType extends Seria
 	}
 
 	private CriteriaQuery<TAggregateRoot> createCriteriaQuery(
-			Predicate uniqueSpecification) {
+			Optional<Predicate> specification) {
 		CriteriaBuilder builder = this.entityManager.getCriteriaBuilder();
 		CriteriaQuery<TAggregateRoot> query = builder
 				.createQuery(this.entityClass);
 		Root<TAggregateRoot> resultRoot = query.from(this.entityClass);
-		query.select(resultRoot).where(uniqueSpecification);
+		if (specification.isPresent()) {
+			query.select(resultRoot).where(specification.get());
+		}
 		return query;
 	}
 
@@ -85,7 +87,7 @@ public abstract class AbstractJPARepository<TAggregateRoot, IdType extends Seria
 		this.entityManager.getTransaction().begin();
 		try {
 			List<TAggregateRoot> result = this.entityManager.createQuery(
-					createCriteriaQuery(specification.get())).getResultList();
+					createCriteriaQuery(specification)).getResultList();
 			this.entityManager.getTransaction().commit();
 			return result;
 		} catch (RuntimeException e) {
