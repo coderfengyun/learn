@@ -86,5 +86,11 @@
 			<artifactId>jedis</artifactId>
 			<version>2.7.0</version>
 		</dependency>
+		<dependency>
+			<groupId>org.springframework.data</groupId>
+			<artifactId>spring-data-redis</artifactId>
+			<version>1.5.0.RELEASE</version>
+		</dependency>
+		<!-- Required by redis end -->
 	</dependencies>
 </project>
