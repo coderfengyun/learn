@@ -12,7 +12,7 @@ public class RedisHelper {
 	private static Jedis jedisSingleton = new Jedis("127.0.0.1", 6379);
 
 	public static Jedis getJedisSingleton() {
-		jedisSingleton.auth("chen123");
+		jedisSingleton.auth("123456");
 		return jedisSingleton;
 	}
 
