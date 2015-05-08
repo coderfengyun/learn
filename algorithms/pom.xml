@@ -92,5 +92,10 @@
 			<version>1.5.0.RELEASE</version>
 		</dependency>
 		<!-- Required by redis end -->
+		<dependency>
+			<groupId>org.hibernate</groupId>
+			<artifactId>hibernate-ehcache</artifactId>
+			<version>4.3.9.Final</version>
+		</dependency>
 	</dependencies>
 </project>

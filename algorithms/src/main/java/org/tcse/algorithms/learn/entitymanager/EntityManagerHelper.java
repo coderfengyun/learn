@@ -12,10 +12,10 @@ import javax.persistence.SharedCacheMode;
 import javax.persistence.ValidationMode;
 import javax.persistence.spi.PersistenceUnitTransactionType;
 
-import org.hibernate.jpa.AvailableSettings;
 import org.hibernate.jpa.HibernatePersistenceProvider;
 import org.hibernate.jpa.boot.spi.Bootstrap;
 import org.hibernate.jpa.boot.spi.PersistenceUnitDescriptor;
+import org.tcse.algorithms.hibernate_ehcache.CachedEntity;
 
 public class EntityManagerHelper {
 	private static final String PERSISTENCE_UNIT_NAME = "AbstractJPARepository";
@@ -38,10 +38,6 @@ public class EntityManagerHelper {
 		try {
 			properties.load(AbstractJPARepository.class.getClassLoader()
 					.getResourceAsStream("config.properties"));
-			properties.put(AvailableSettings.PROVIDER,
-					HibernatePersistenceProvider.class.getName());
-			properties
-					.put(AvailableSettings.TRANSACTION_TYPE, "RESOURCE_LOCAL");
 			return properties;
 		} catch (IOException e) {
 			throw new RuntimeException(e);
@@ -84,7 +80,8 @@ public class EntityManagerHelper {
 		}
 
 		public List<String> getManagedClassNames() {
-			return Arrays.asList(User.class.getName(), Account.class.getName());
+			return Arrays.asList(User.class.getName(), Account.class.getName(),
+					CachedEntity.class.getName());
 		}
 
 		public List<String> getMappingFileNames() {

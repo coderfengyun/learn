@@ -17,7 +17,7 @@ public abstract class AbstractJPARepository<TAggregateRoot, IdType extends Seria
 	EntityManager entityManager = EntityManagerHelper.getEntityManager();
 	private Class<TAggregateRoot> entityClass;
 
-	AbstractJPARepository(Class<TAggregateRoot> entityClass) {
+	protected AbstractJPARepository(Class<TAggregateRoot> entityClass) {
 		this.entityClass = entityClass;
 	}
 
@@ -35,8 +35,10 @@ public abstract class AbstractJPARepository<TAggregateRoot, IdType extends Seria
 	public void remove(IdType id) {
 		this.entityManager.getTransaction().begin();
 		try {
-			this.entityManager.remove(this.entityManager.find(this.entityClass,
-					id));
+			TAggregateRoot find = this.entityManager.find(this.entityClass, id);
+			if (find != null) {
+				this.entityManager.remove(find);
+			}
 			this.entityManager.getTransaction().commit();
 		} catch (RuntimeException e) {
 			this.entityManager.getTransaction().rollback();

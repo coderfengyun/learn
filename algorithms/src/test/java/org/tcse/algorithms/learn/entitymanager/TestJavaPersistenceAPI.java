@@ -10,8 +10,13 @@ public class TestJavaPersistenceAPI {
 
 	@Test
 	public void testAdd() {
+
+		userRepo.remove((long) 1);
+
 		User user = new User(1, "TestJavaPersistenceAPI.testAdd", 1000);
 		userRepo.store(user);
+
+		userRepo.remove((long) 1);
 	}
 
 	@Test
