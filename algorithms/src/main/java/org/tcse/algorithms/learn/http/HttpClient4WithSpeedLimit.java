@@ -49,6 +49,7 @@ public class HttpClient4WithSpeedLimit {
 				.getSchemeRegistry();
 		// This means that when the httpclient need a "http" scheme, it will
 		// find our speed limited one.
+
 		schemeRegistry.register(SPEED_LIMITED_HttpScheme);
 	}
 
@@ -73,5 +74,15 @@ public class HttpClient4WithSpeedLimit {
 		HttpResponse response = this.httpclient.execute(request,
 				HttpClientContext.create());
 		assertEquals(200, response.getStatusLine().getStatusCode());
+	}
+
+	@Test
+	public void testGoogleTranslate() throws ClientProtocolException,
+			IOException {
+		HttpUriRequest request = new HttpGet(
+				"http://translate.google.cn/#en/zh-CN/base");
+		request.addHeader("User-Agent", "Mozilla/4.0");
+		HttpResponse response = this.httpclient.execute(request);
+		System.out.println(response.getStatusLine());
 	}
 }

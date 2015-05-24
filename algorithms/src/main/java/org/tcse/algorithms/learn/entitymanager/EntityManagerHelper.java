@@ -81,7 +81,8 @@ public class EntityManagerHelper {
 
 		public List<String> getManagedClassNames() {
 			return Arrays.asList(User.class.getName(), Account.class.getName(),
-					CachedEntity.class.getName());
+					CachedEntity.class.getName(),
+					EntityWithPrivateConstructor.class.getName());
 		}
 
 		public List<String> getMappingFileNames() {

@@ -77,7 +77,7 @@ public class RedisHelper {
 
 	public static class FieldsHash {
 		public void set(String key, String field, String value) {
-			jedisSingleton.hset(key, field, value);
+			RedisHelper.getJedisSingleton().hset(key, field, value);
 		}
 	}
 
