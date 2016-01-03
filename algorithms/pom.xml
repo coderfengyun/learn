@@ -5,7 +5,19 @@
 	<groupId>org.tcse</groupId>
 	<artifactId>algorithms</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-	<packaging>jar</packaging>
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <configuration>
+                    <source>1.8</source>
+                    <target>1.8</target>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+    <packaging>jar</packaging>
 
 	<name>algorithms</name>
 	<url>http://maven.apache.org</url>
@@ -19,7 +31,6 @@
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
 			<version>4.11</version>
-			<scope>test</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.tomcat</groupId>
@@ -80,7 +91,7 @@
 			<artifactId>Memcached-Java-Client</artifactId>
 			<version>3.0.0</version>
 		</dependency>
-		<!-- Required by Redis -->
+		<!-- Required by Redis begin -->
 		<dependency>
 			<groupId>redis.clients</groupId>
 			<artifactId>jedis</artifactId>
@@ -96,6 +107,11 @@
 			<groupId>org.hibernate</groupId>
 			<artifactId>hibernate-ehcache</artifactId>
 			<version>4.3.9.Final</version>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.thrift</groupId>
+			<artifactId>libthrift</artifactId>
+			<version>0.9.2</version>
 		</dependency>
 	</dependencies>
 	<build>
