@@ -1,5 +1,7 @@
 /typescript/node_modules/
 /typescript/node_modules/.bin/
+/typescript/dist/
+
 # Windows image file caches
 Thumbs.db
 ehthumbs.db
