@@ -1,40 +1,72 @@
 use std::error::Error;
 use std::fs;
+use std::env;
 
 #[cfg(test)]
 mod tests {
     use super::*;
 
     #[test]
-    pub fn one_result() {
+    pub fn case_sensitive() {
         let query = "duct";
         let contents = "Rust:\n\
         safe, fast, productive.\n
-        Pick three.";
+        Pick three.\n
+        Duct tape.";
         assert_eq!(vec!["safe, fast, productive."], search(query, contents));
     }
+
+    #[test]
+    fn case_insensitive() {
+        let query = "rUsT";
+        let contents = "Rust:\n\
+        safe, fast, productive.\n
+        Pick three.\n\
+        Trust me.";
+        assert_eq!(
+            vec!["Rust:", "Trust me."],
+            search_case_insensitive(query, contents)
+        );
+    }
+}
+
+fn search_case_insensitive<'a>(query: &str, contents: &'a str) -> Vec<&'a str> {
+    let query = &query.to_lowercase();
+    let mut result = Vec::new();
+    for line in contents.lines() {
+        if line.to_lowercase().contains(query) {
+            result.push(line);
+        }
+    }
+
+    result
 }
 
 pub fn search<'a>(query: &str, contents: &'a str) -> Vec<&'a str> {
     let mut result = Vec::new();
 
     for line in contents.lines() {
-       if line.contains(query) {
+        if line.contains(query) {
             result.push(line);
-       }
+        }
     }
     result
 }
 
 pub fn run(config: Config) -> Result<(), Box<dyn Error>> {
-    println!(
-        "searchString: {}, filePath: {}",
-        config.query, config.filename
-    );
 
-    let result = fs::read_to_string(&config.filename)?;
+    let contents = fs::read_to_string(&config.filename)?;
 
-    println!("config: {:?}, file content is :{}", &config, result);
+    let result = if config.case_sensitive {
+        search(&config.query, &contents)
+    } else {
+        search_case_insensitive(&config.query, &contents)
+    };
+
+    for line in result {
+        println!("{}", line);
+    }
+
     Ok(())
 }
 
@@ -42,6 +74,7 @@ pub fn run(config: Config) -> Result<(), Box<dyn Error>> {
 pub struct Config {
     query: String,
     filename: String,
+    case_sensitive: bool,
 }
 
 impl Config {
@@ -51,9 +84,9 @@ impl Config {
         }
 
         let query = args[1].clone();
-
         let filename = args[2].clone();
+        let case_sensitive = env::var("CASE_INSENSITIVE").is_err();
 
-        Ok(Config { query, filename })
+        Ok(Config { query, filename, case_sensitive})
     }
 }
