@@ -5,17 +5,11 @@ pub struct Post {
 
 pub trait State {
 
-    fn request_review(self: Box<Self>) -> Box<dyn State> {
-        self
-    }
+    fn request_review(self: Box<Self>) -> Box<dyn State>;
 
-    fn approve(self: Box<Self>) -> Box<dyn State> {
-        self
-    }
+    fn approve(self: Box<Self>) -> Box<dyn State>;
 
-    fn reject(self: Box<Self>) -> Box<dyn State> {
-        self
-    }
+    fn reject(self: Box<Self>) -> Box<dyn State>;
 
     fn content<'a>(&self, post: &'a Post) -> &'a str {
         ""
@@ -34,6 +28,14 @@ impl State for Draft {
         Box::new(PendingReview { approved_times: 0})
     }
 
+    fn approve(self: Box<Self>) -> Box<dyn State> {
+        self
+    }
+
+    fn reject(self: Box<Self>) -> Box<dyn State> {
+        self
+    }
+
     fn can_add_text(&self) -> bool {
         true
     }
@@ -45,7 +47,11 @@ pub struct PendingReview {
 
 impl State for PendingReview {
 
-    fn approve(self: Box<Self>) -> Box<dyn State> {
+    fn request_review(self: Box<Self>) -> Box<dyn State> {
+        Box::new(PendingReview { approved_times: 0})
+    }
+
+    fn approve(mut self: Box<Self>) -> Box<dyn State> {
         self.approved_times += 1;
 
         if self.approved_times == 2 {
@@ -63,6 +69,18 @@ impl State for PendingReview {
 pub struct Published {}
 
 impl State for Published {
+
+    fn request_review(self: Box<Self>) -> Box<dyn State> {
+        self
+    }
+
+    fn approve(self: Box<Self>) -> Box<dyn State> {
+        self
+    }
+
+    fn reject(self: Box<Self>) -> Box<dyn State> {
+        self
+    }
 
     fn content<'a>(&self, post: &'a Post) -> &'a str {
         post.content.as_str()
