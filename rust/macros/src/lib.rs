@@ -181,3 +181,162 @@ mod trailing_separator {
     }
 }
 
+pub mod tt_bundle {
+    macro_rules! call_a_or_b_on_tail {
+        ((a: $a: expr, b: $b: expr), call a: $($tail:tt)*) => {
+            $a(stringify!($($tail)*))
+        };
+        ((a: $a: expr, b: $b: expr), call b: $($tail:tt)*) => {
+            $b(stringify!($($tail)*))
+        };
+        ($ab:tt, $_skip:tt $($tail:tt)*) => {
+            call_a_or_b_on_tail!($ab, $($tail)*)
+        };
+    }
+
+    pub fn compute_len(s: &str) -> Option<usize> {
+        Some(s.len())
+    }
+
+    pub fn show_tail(s: &str) -> Option<usize> {
+        println!("{:?}", s);
+        None
+    }
+
+    mod usage {
+
+        pub fn use_1() -> Option<usize> {
+            call_a_or_b_on_tail!(
+                (a: crate::tt_bundle::compute_len, b: crate::tt_bundle::show_tail),
+                the recursive part that skips over all these
+                tokens does not much care whether we will call a
+                or call b: only the terminal rules care.
+            )
+        }
+
+        pub fn use_2() -> Option<usize> {
+            call_a_or_b_on_tail!(
+                (a: crate::tt_bundle::compute_len, b: crate::tt_bundle::show_tail),
+                and now, to justify the existence of two paths
+                we will also call a: its input should somehow
+                be self-referential, so let us make it return
+                some ninety one!
+            )
+        }
+    }
+
+    mod tests {
+        use crate::tt_bundle::usage::{use_1, use_2};
+
+        #[test]
+        pub fn test_use1() {
+            assert_eq!(use_1(), None);
+        }
+
+        #[test]
+        pub fn test_use2() {
+            assert_eq!(use_2(), Some(89));
+        }
+    }
+}
+
+mod visibility {
+
+    macro_rules! newtype_new {
+        (struct $name:ident($t:ty)) => { newtype_new!(() struct $name($t)) };
+        (pub struct $name:ident($t:ty)) => { newtype_new!((pub) struct $name($t)) };
+        (($($vis:tt)*) struct $name:ident($t:ty)) => {
+            #[derive(Debug)]
+            struct $name($t);
+            as_item! {
+                impl $name {
+                    $($vis)* fn new(value:$t) -> Self {
+                        $name(value)
+                    }
+                }
+            }
+        }
+    }
+
+    macro_rules! as_item {
+        ($i:item) => {
+            $i
+        };
+    }
+
+    mod usage {
+        pub fn use1() {
+            newtype_new!(struct priv_struct(u32));
+            let res: priv_struct = priv_struct::new(12);
+            println!("{:?}", res);
+        }
+
+        pub fn use2() {
+            newtype_new!(pub struct pub_struct(i32));
+            let res = pub_struct::new(-12);
+            println!("{:?}", res);
+        }
+    }
+
+    mod tests {
+        use crate::visibility::usage::{use1, use2};
+
+        #[test]
+        pub fn use1_test() {
+            use1();
+        }
+
+        #[test]
+        pub fn use2_test() {
+            use2();
+        }
+    }
+}
+
+mod abacus {
+    macro_rules! abacus {
+        ((- $($moves:tt)*) -> (+ $($count:tt)*)) => {
+            abacus!(($($moves)*) -> ($($count)*))
+        };
+        ((- $($moves:tt)*) -> ($($count:tt)*)) => {
+            abacus!(($($moves)*) -> (- $($count)*))
+        };
+        ((+ $($moves:tt)*) -> (- $($count:tt)*)) => {
+            abacus!(($($moves)*) -> ($($count)*))
+        };
+        ((+ $($moves:tt)*) -> ($($count:tt)*)) => {
+            abacus!(($($moves)*) -> (+ $($count)*))
+        };
+        (() -> ()) => {
+            0
+        };
+        (() -> (- $($count:tt)*)) => {
+            {(-1i32) $(- replace_expr!($count 1i32))* }
+        };
+        (() -> (+ $($count:tt)*)) => {
+            {(1i32) $(+ replace_expr!($count 1i32))*}
+        };
+    }
+
+    macro_rules! replace_expr {
+        ($_t:tt $sub:expr) => { $sub }
+    }
+
+    mod usage {
+
+        pub fn use1() {
+            let result = abacus!((++-+-+++--++---++----+++) -> ());
+            println!("{:?}", result);
+        }
+    }
+
+    mod tests {
+        use crate::abacus::usage::use1;
+
+        #[test]
+        pub fn test1() {
+            use1();
+        }
+    }
+}
+
