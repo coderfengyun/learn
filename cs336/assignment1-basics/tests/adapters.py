@@ -9,7 +9,7 @@ from jaxtyping import Float, Int
 import numpy.typing as npt
 import torch
 from torch import Tensor
-from cs336_basics.bpe_tokenizer import BPETokenizer
+from cs336_basics.bpe_tokenizer import BPETokenizer, train
 from cs336_basics.pretokenization_example import find_chunk_boundaries
 
 
@@ -592,76 +592,6 @@ def run_train_bpe(
                 representing that <token1> was merged with <token2>.
                 Merges are ordered by order of creation.
     """
-    vocab: dict[int, bytes] = {}
-    merges: list[tuple[bytes, bytes]] = []
-
-    # 读取文件返回一个iterable
-    boundaries = find_chunk_boundaries(input_path, 1, b"<|endoftext|>")
-    PAT: str = r"""'(?:[sdmt]|ll|ve|re)| ?\p{L}+| ?\p{N}+| ?[^\s\p{L}\p{N}]+|\s+(?!\S)|\s+"""
-
-    # read file content with boundaries
-    with open(input_path, 'r') as f:
-        text = f.read()
-
-    word_freq: dict[str, int] = {}
-    for start, end in zip(boundaries[:-1], boundaries[1:]):
-        f.seek(start)
-        chunk = f.read(end - start).decode("utf-8", errors="ignore")
-        # Run pre-tokenization on your chunk and store the counts for each pre-token
-        words = re.findall(PAT, chunk)
-        # count the frequency of each word
-        for word in words:
-            word_freq[word] = word_freq.get(word, 0) + 1
-
-    vocab, merges = train_bpe_words(word_freq, vocab, merges, vocab_size, special_tokens)
-    
-    return vocab, merges
-
-def train_bpe_words(words: dict[str, int], vocab: dict[int, bytes], merges: list[tuple[bytes, bytes]], vocab_size: int, special_tokens: list[str]) -> tuple[dict[int, bytes], list[tuple[bytes, bytes]]]:
-    token_pair_freq: dict[tuple[bytes, bytes], int] = {}
-    word_2_tokens: dict[str, list[bytes]] = {}
-
-    # copy words and remove special tokens
-    words = {word: freq for word, freq in words.items() if word not in special_tokens}
-    
-    # initialize word_2_tokens
-    for word, freq in words.items():
-        word_2_tokens[word] = [word.encode("utf-8")]
-
-    # count the frequency of each token pair
-    pair_2_words: dict[tuple[bytes, bytes], list[str]] = {}
-    for word, freq in words.items():
-        
-        # split word into bytes
-        bytes_list = [word.encode("utf-8") for word in word]
-        for i in range(len(bytes_list) - 1):
-            pair = (bytes_list[i], bytes_list[i + 1])
-            token_pair_freq[pair] = token_pair_freq.get(pair, 0) + freq
-            pair_2_words[pair] = word
-
-    # sort token_pair_freq by frequency, take the max
-    sorted_token_pair_freq = sorted(token_pair_freq.items(), key=lambda x: x[1], reverse=True)
-    
-    # take the first of sorted_token_pair_freq
-    most_freqent_pair, freq = sorted_token_pair_freq[0]
-    vocab[len(vocab)] = most_freqent_pair[0]
-    merges.append(most_freqent_pair)
-    
-    # update word_2_tokens, from stand alone token to pair
-    for word, freq in pair_2_words[most_freqent_pair]:
-        if word not in word_2_tokens:
-            continue
-        token_list = word_2_tokens[word]
-        # iterate through word_2_tokens[word], replace the token with the pair
-        for i in range(len(token_list) - 1):
-            pair = (bytes_list[i], bytes_list[i + 1])
-            
-            # if pair is most frequent pair, replace the tokens with the pair
-            if pair == most_freqent_pair:
-                word_2_tokens[word] = token_list[0:i] + [most_freqent_pair] + token_list[i+2:]
-
-        # update pair_2_words
-        pair_2_words[pair] = [word]
-
-    return vocab, merges
+    content = open(input_path, 'r').read()
+    return train(content, vocab_size)
 
